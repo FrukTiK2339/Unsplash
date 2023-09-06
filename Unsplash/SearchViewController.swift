@@ -14,13 +14,14 @@ enum LoadingMode {
 
 class SearchViewController: UIViewController {
     
-    
     private let dataFetcher = NetworkDataFetcher()
     private var randomPageCounter = 1
     private var searchPageCounter = 1
     private var currentMode: LoadingMode = .random
+    private var previousMode: LoadingMode = .random
     
     private var posts = [Post]()
+    private var tempPost = [Post]()
     private var collectionView: UICollectionView!
     
     override func viewDidLoad() {
@@ -28,15 +29,6 @@ class SearchViewController: UIViewController {
         setupCollectionView()
         setupSearchBar()
         loadRandomPhotosData()
-    }
-    
-    private func reloadData() {
-        switch currentMode {
-        case .random:
-            loadRandomPhotosData()
-        case .search(let target):
-            loadSearchedPhotosData(target: target)
-        }
     }
     
     private func loadRandomPhotosData() {
@@ -52,11 +44,37 @@ class SearchViewController: UIViewController {
         }
     }
     
+    private func appendRandomPhotosData() {
+        dataFetcher.getRandomPhotos(pageNumber: randomPageCounter) { result in
+            switch result {
+            case .success(let loadedPosts):
+                self.posts.append(contentsOf: loadedPosts)
+                self.randomPageCounter += 1
+                self.collectionView.reloadData()
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
     private func loadSearchedPhotosData(target: String) {
         dataFetcher.getSearchedPhotos(pageNumber: searchPageCounter, target: target) { result in
             switch result {
             case .success(let loadedPosts):
                 self.posts = loadedPosts
+                self.searchPageCounter += 1
+                self.collectionView.reloadData()
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    private func appendSearchedPhotosData(target: String) {
+        dataFetcher.getSearchedPhotos(pageNumber: searchPageCounter, target: target) { result in
+            switch result {
+            case .success(let loadedPosts):
+                self.posts.append(contentsOf: loadedPosts)
                 self.searchPageCounter += 1
                 self.collectionView.reloadData()
             case .failure(let error):
@@ -114,6 +132,21 @@ class SearchViewController: UIViewController {
        
         return section
     }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.row == posts.count - 2 {
+            switch currentMode {
+            case .random:
+                appendRandomPhotosData()
+            case .search(let target):
+                appendSearchedPhotosData(target: target)
+            }
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        dataFetcher.sendPhotoReaction(id: posts[indexPath.row].id, isLiked: true)
+    }
 }
 
 extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
@@ -133,13 +166,20 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
 extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let text = searchBar.text, text != "" else { return }
+        previousMode = currentMode
+        tempPost = posts
         currentMode = .search(text)
-        reloadData()
+        loadSearchedPhotosData(target: text)
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        currentMode = .random
-        reloadData()
+        currentMode = previousMode
+        if !tempPost.isEmpty {
+            self.posts = tempPost
+        } else {
+            loadRandomPhotosData()
+        }
+        
+        collectionView.reloadData()
     }
 }
-

@@ -22,6 +22,10 @@ class SearchResultCollectionCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        imageView.image = nil
+    }
+    
     private func commonInit() {
         contentView.addSubview(imageView)
         imageView.frame = contentView.bounds
@@ -31,10 +35,6 @@ class SearchResultCollectionCell: UICollectionViewCell {
     }
     
     func configure(with model: Post) {
-        if let urlString = model.urls["small"] {
-            imageView.set(imageURL: urlString)
-        }
+        imageView.set(imageURL: model.urls["thumb"])
     }
-    
-    
 }

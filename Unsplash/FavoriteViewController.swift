@@ -9,38 +9,16 @@ import UIKit
 
 class FavoriteViewController: UIViewController {
     
-    let button = UIButton(type: .system)
-    
-   
+//    var collectionView: UICollectionView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
+//        setupCollectionView()
         
-        view.addSubview(button)
-        button.frame.size = CGSize(width: 200, height: 80)
-        button.center = view.center
-        button.addTarget(self, action: #selector(tap), for: .touchUpInside)
-        button.setTitle("Download", for: .normal)
+        
     }
     
-    @objc func tap() {
-//        apiTasker.getRandomPhotos(pageNumber: 2) { result in
-//            switch result {
-//            case .success(let posts):
-//                print(posts.count)
-//            case .failure(let error):
-//                print(error.localizedDescription)
-//            }
-//        }
-        
-//        apiTasker.getSearchedPhotos(pageNumber: 3, target: "cat") { result in
-//            switch result {
-//            case .success(let posts):
-//                print(posts.count)
-//            case .failure(let error):
-//                print(error.localizedDescription)
-//            }
-//        }
-    }
+//    private func setupCollectionView() {}
+
 }
