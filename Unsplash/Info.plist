@@ -15,11 +15,13 @@
 					<string>Default Configuration</string>
 					<key>UISceneDelegateClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-					<key>UISceneStoryboardFile</key>
-					<string>Main</string>
 				</dict>
 			</array>
 		</dict>
 	</dict>
+	<key>UNSPLASH_CLIENT_ID</key>
+	<string>UkAo332eWPrezp1JVnGdfG3oANieDFuaj6s5DNKvVTM</string>
+	<key>UNSPLASH_CLIENT_SECRET</key>
+	<string>AiZ3hEfcvKPVBgWEQFv30w-jsGZlsHaxpI0gJytd9ZA</string>
 </dict>
 </plist>
