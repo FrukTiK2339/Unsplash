@@ -8,4 +8,5 @@ target 'Unsplash' do
 
   # Pods for Unsplash
   pod 'UnsplashPhotoPicker', '~> 1.3'
+  pod 'Unsplash'
 end

@@ -10,6 +10,7 @@ import UIKit
 struct User: Decodable {
     var name: String
     var location: String?
+    var profileImage: [String:String]
 }
 
 struct Post: Decodable {
@@ -27,9 +28,10 @@ struct SearchPhotosResponse: Decodable {
 
 public class NetworkDataFetcher {
     
+    private let apiURLs = ApiURL()
+    
     func getRandomPhotos(pageNumber: Int, completion: @escaping (Result<[Post], Error>) -> Void) {
-        guard let url = URL(string: ApiURL.shared.getRandomPhotosURLString(pageNumber: pageNumber)) else { return }
-        print("Request for Random Photos \n URL: \(url.absoluteString)")
+        guard let url = URL(string: apiURLs.getRandomPhotosURLString(pageNumber: pageNumber)) else { return }
         let dataTask = URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard let data = data else {
                 completion(.failure(error!))
@@ -48,8 +50,8 @@ public class NetworkDataFetcher {
     }
     
     func getSearchedPhotos(pageNumber: Int, target: String, completion: @escaping (Result<[Post], Error>) -> Void) {
-        guard let url = URL(string: ApiURL.shared.getSearchPhotosURLString(target: target, pageNumber: pageNumber)) else { return }
-        print("Request for Searching Photos (\(target)) \n URL: \(url.absoluteString)")
+        let formattedTarget = target.replacingOccurrences(of: " ", with: "%20")
+        guard let url = URL(string: apiURLs.getSearchPhotosURLString(target: formattedTarget, pageNumber: pageNumber)) else { return }
         let dataTask = URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard let data = data else {
                 completion(.failure(error!))
@@ -71,22 +73,5 @@ public class NetworkDataFetcher {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         guard let data = from, let response = try? decoder.decode(type.self, from: data) else { return nil }
         return response
-    }
-    
-    public func sendPhotoReaction(id: String, isLiked: Bool) {
-        guard let url = URL(string: ApiURL.shared.getLikePhotoRequestURLString(id: id)) else { return }
-        print(url.absoluteString)
-        var request = URLRequest(url: url)
-        request.httpMethod = isLiked ? "POST" : "DELETE"
-        
-        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                print(error.localizedDescription)
-            } else {
-                print("success task")
-            }
-            
-        }
-        task.resume()
     }
 }

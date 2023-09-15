@@ -13,7 +13,7 @@ class MainTabBarController: UITabBarController {
         super.viewDidLoad()
         
         let searchVC = SearchViewController()
-        let favoriteVC = FavoriteViewController()
+        let favoriteVC = FavoriteViewController(with: nil)
         
         tabBar.tintColor = .gray
         
