@@ -13,13 +13,21 @@ struct User: Decodable {
     var profileImage: [String:String]
 }
 
-struct Post: Decodable {
+struct Post: Decodable, Hashable {
     var id: String
     var createdAt: String
     var description: String?
     var likedByUser: Bool
     var urls: [String:String]
     var user: User
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Post, rhs: Post) -> Bool {
+        return lhs.id == rhs.id
+    }
 }
 
 struct SearchPhotosResponse: Decodable {

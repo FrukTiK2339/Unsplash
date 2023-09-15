@@ -12,26 +12,40 @@ enum LoadingMode {
     case search(String)
 }
 
-class SearchViewController: UIViewController {
+class SearchViewController: UIViewController, UICollectionViewDelegate {
+    
+    enum Section {
+        case searched
+    }
     
     private let dataFetcher = NetworkDataFetcher()
     
-    private var currentPosts = [Post]()
+    private var currentPosts = Bundle.main.decode([Post].self, from: "fakeData.json")  //[Post]()
     private var currentPageCounter = 1
     private var currentMode: LoadingMode = .random
     
-    private var previousPosts = [Post]()
+    private var previousPosts = Bundle.main.decode([Post].self, from: "fakeData.json")  //[Post]()
     private var previousPageCounter = 1
     private var previousMode: LoadingMode = .random
     
     private var collectionView: UICollectionView!
     
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Post>!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
         setupSearchBar()
-        collectionView.reloadData()
+        setupDataSource()
         loadRandomPhotosData()
+    }
+    
+    func setupDataSource() {
+        dataSource = UICollectionViewDiffableDataSource<Section, Post>(collectionView: collectionView, cellProvider: { (collectionView, indexPath, cellData) -> UICollectionViewCell? in
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchResultCollectionCell.identifier, for: indexPath) as! SearchResultCollectionCell
+            cell.configure(with: self.currentPosts[indexPath.row])
+            return cell
+        })
     }
     
     private func loadRandomPhotosData() {
@@ -40,7 +54,7 @@ class SearchViewController: UIViewController {
             case .success(let loadedPosts):
                 self.currentPosts = loadedPosts
                 self.currentPageCounter += 1
-                self.collectionView.reloadData()
+                self.updateUI()
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -53,7 +67,7 @@ class SearchViewController: UIViewController {
             case .success(let loadedPosts):
                 self.currentPosts.append(contentsOf: loadedPosts)
                 self.currentPageCounter += 1
-                self.collectionView.reloadData()
+                self.updateUI()
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -66,7 +80,7 @@ class SearchViewController: UIViewController {
             case .success(let loadedPosts):
                 self.currentPosts = loadedPosts
                 self.currentPageCounter += 1
-                self.collectionView.reloadData()
+                self.updateUI()
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -79,7 +93,7 @@ class SearchViewController: UIViewController {
             case .success(let loadedPosts):
                 self.currentPosts.append(contentsOf: loadedPosts)
                 self.currentPageCounter += 1
-                self.collectionView.reloadData()
+                self.updateUI()
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -89,9 +103,15 @@ class SearchViewController: UIViewController {
     private func setupCollectionView() {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createCompositionalLayout())
         collectionView.delegate = self
-        collectionView.dataSource = self
         collectionView.register(SearchResultCollectionCell.self, forCellWithReuseIdentifier: SearchResultCollectionCell.identifier)
         view.addSubview(collectionView)
+    }
+    
+    private func updateUI() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Post>()
+        snapshot.appendSections([.searched])
+        snapshot.appendItems(currentPosts, toSection: .searched)
+        dataSource.apply(snapshot)
     }
     
     private func setupSearchBar() {
@@ -158,22 +178,6 @@ class SearchViewController: UIViewController {
                 self.present(detailVC, animated: true)
             }
         }
-        
-        
-    }
-}
-
-extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return currentPosts.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchResultCollectionCell.identifier, for: indexPath) as? SearchResultCollectionCell else {
-            return UICollectionViewCell()
-        }
-        cell.configure(with: currentPosts[indexPath.row])
-        return cell
     }
 }
 

@@ -9,15 +9,12 @@ import UIKit
 
 class DetailsPhotoViewController: UIViewController {
     
-    //data
     private var post: Post
     
     private var postImageView = WebImageView()
     private var postDiscriptionLabel = UILabel()
     private var postDateLabel = UILabel()
-    
     private var likeButton = UIButton()
-    
     private var userStackView = UIStackView()
     private var userContainerView = UIView()
     private var userCircleImageView = WebImageView()
